@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Health Dashboard</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Smart Health Dashboard</h1>
+        </header>
+        <main>
+            <div class="dashboard-grid">
+                <div class="card">
+                    <h2>Heart Rate</h2>
+                    <div id="heart-rate-chart"></div>
+                </div>
+                <div class="card">
+                    <h2>Blood Pressure</h2>
+                    <div id="blood-pressure-chart"></div>
+                </div>
+                <div class="card">
+                    <h2>Temperature</h2>
+                    <div id="temperature-chart"></div>
+                </div>
+                <div class="card">
+                    <h2>Oxygen Level</h2>
+                    <div id="oxygen-chart"></div>
+                </div>
+            </div>
+        </main>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+</body>
+</html> 
