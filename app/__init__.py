@@ -1,11 +1,16 @@
 from flask import Flask
-from app.config import Config
+import os
+from dotenv import load_dotenv
 
-def create_app(config_class=Config):
+load_dotenv()  # Load environment variables from .env file
+
+def create_app():
+    """Initialize the Flask application."""
     app = Flask(__name__)
-    app.config.from_object(config_class)
-
-    from app.routes import main
-    app.register_blueprint(main)
-
-    return app 
+    app.secret_key = os.getenv('SECRET_KEY', 'default_secret_key')
+    
+    # Import and register blueprints
+    from app.routes import main_bp
+    app.register_blueprint(main_bp)
+    
+    return app
