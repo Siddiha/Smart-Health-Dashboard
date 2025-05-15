@@ -1,15 +1,16 @@
-
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Smart Health Dashboard</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="style.css">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.4/moment.min.js"></script>
 </head>
+
 <body>
     <div class="container">
         <!-- Sidebar -->
@@ -38,7 +39,8 @@
                     <input type="text" placeholder="Search health data...">
                 </div>
                 <div class="user-menu">
-                    <button class="btn btn-refresh" id="refreshData"><i class="fas fa-sync-alt"></i> Refresh Data</button>
+                    <button class="btn btn-refresh" id="refreshData"><i class="fas fa-sync-alt"></i> Refresh
+                        Data</button>
                     <div class="user-profile">
                         <img src="/api/placeholder/40/40" alt="User Profile">
                         <span>Admin User</span>
@@ -102,7 +104,7 @@
                         <canvas id="trendChart"></canvas>
                     </div>
                 </div>
-                
+
                 <div class="dashboard-card">
                     <div class="card-header">
                         <h3>Distribution by Region</h3>
@@ -115,7 +117,7 @@
                         <canvas id="regionChart"></canvas>
                     </div>
                 </div>
-                
+
                 <div class="dashboard-card">
                     <div class="card-header">
                         <h3>Age Demographics</h3>
@@ -128,12 +130,13 @@
                         <canvas id="ageChart"></canvas>
                     </div>
                 </div>
-                
+
                 <div class="dashboard-card">
                     <div class="card-header">
                         <h3>AI-Powered Predictions</h3>
                         <div class="card-actions">
-                            <button class="btn-icon prediction-settings" id="predictionSettings"><i class="fas fa-cog"></i></button>
+                            <button class="btn-icon prediction-settings" id="predictionSettings"><i
+                                    class="fas fa-cog"></i></button>
                             <button class="btn-icon"><i class="fas fa-ellipsis-v"></i></button>
                         </div>
                     </div>
@@ -159,7 +162,7 @@
                         </div>
                     </div>
                 </div>
-                
+
                 <div class="dashboard-card wide">
                     <div class="card-header">
                         <h3>Recent Health Alerts</h3>
@@ -197,7 +200,8 @@
                     <div class="chat-messages" id="chatMessages">
                         <div class="chat-message bot">
                             <div class="message-content">
-                                Hello! I'm your health data assistant. How can I help you understand your health metrics today?
+                                Hello! I'm your health data assistant. How can I help you understand your health metrics
+                                today?
                             </div>
                             <div class="message-time">Just now</div>
                         </div>
@@ -215,5 +219,24 @@
     </div>
 
     <script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+    <script>
+        // Initialize charts (example for trendChart)
+        const trendCtx = document.getElementById('trendChart').getContext('2d');
+        new Chart(trendCtx, {
+            type: 'line',
+            data: {
+                labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May'],
+                datasets: [{
+                    label: 'Cases Trend',
+                    data: [120, 190, 300, 250, 400],
+                    borderColor: 'rgb(75, 192, 192)',
+                    tension: 0.1
+                }]
+            }
+        });
+
+        // Add similar initialization for regionChart and ageChart
+    </script>
 </body>
+
 </html>

@@ -5,34 +5,157 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Smart Health Dashboard</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
 </head>
 <body>
     <div class="container">
-        <header>
-            <h1>Smart Health Dashboard</h1>
-        </header>
-        <main>
-            <div class="dashboard-grid">
-                <div class="card">
-                    <h2>Heart Rate</h2>
-                    <div id="heart-rate-chart"></div>
-                </div>
-                <div class="card">
-                    <h2>Blood Pressure</h2>
-                    <div id="blood-pressure-chart"></div>
-                </div>
-                <div class="card">
-                    <h2>Temperature</h2>
-                    <div id="temperature-chart"></div>
-                </div>
-                <div class="card">
-                    <h2>Oxygen Level</h2>
-                    <div id="oxygen-chart"></div>
-                </div>
+        <!-- Sidebar -->
+        <nav class="sidebar">
+            <div class="sidebar-header">
+                <h2><i class="fas fa-heartbeat"></i> HealthTrack</h2>
             </div>
+            <ul class="sidebar-menu">
+                <li class="active"><a href="#dashboard"><i class="fas fa-chart-line"></i> <span>Dashboard</span></a></li>
+                <li><a href="#outbreaks"><i class="fas fa-virus"></i> <span>Outbreaks</span></a></li>
+                <li><a href="#map"><i class="fas fa-map-marked-alt"></i> <span>Map View</span></a></li>
+                <li><a href="#ai-predictions"><i class="fas fa-robot"></i> <span>AI Predictions</span></a></li>
+                <li><a href="#chat"><i class="fas fa-comment-medical"></i> <span>Health Chat</span></a></li>
+                <li><a href="#settings"><i class="fas fa-cog"></i> <span>Settings</span></a></li>
+            </ul>
+            <div class="sidebar-footer">
+                <span>Data last updated: <span id="last_update">--</span></span>
+            </div>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="main-header">
+                <div class="search-container">
+                    <i class="fas fa-search"></i>
+                    <input type="text" placeholder="Search health data...">
+                </div>
+                <div class="user-menu">
+                    <button class="btn btn-refresh" id="refreshData"><i class="fas fa-sync-alt"></i> Refresh Data</button>
+                    <div class="user-profile">
+                        <img src="/static/img/user.png" alt="User Profile">
+                        <span>Admin User</span>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Dashboard Cards -->
+            <section id="dashboard" class="dashboard-summary">
+                <div class="summary-card">
+                    <div class="summary-icon bg-blue">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <div class="summary-info">
+                        <h3>Total Cases</h3>
+                        <p class="summary-value" id="total_cases">--</p>
+                        <span class="trend up"><i class="fas fa-arrow-up"></i> <span id="cases_trend">--</span></span>
+                    </div>
+                </div>
+                <div class="summary-card">
+                    <div class="summary-icon bg-green">
+                        <i class="fas fa-medkit"></i>
+                    </div>
+                    <div class="summary-info">
+                        <h3>Recoveries</h3>
+                        <p class="summary-value" id="total_recoveries">--</p>
+                        <span class="trend up"><i class="fas fa-arrow-up"></i> <span id="recoveries_trend">--</span></span>
+                    </div>
+                </div>
+                <div class="summary-card">
+                    <div class="summary-icon bg-red">
+                        <i class="fas fa-procedures"></i>
+                    </div>
+                    <div class="summary-info">
+                        <h3>Active Cases</h3>
+                        <p class="summary-value" id="active_cases">--</p>
+                        <span class="trend down"><i class="fas fa-arrow-down"></i> <span id="active_trend">--</span></span>
+                    </div>
+                </div>
+                <div class="summary-card">
+                    <div class="summary-icon bg-purple">
+                        <i class="fas fa-chart-pie"></i>
+                    </div>
+                    <div class="summary-info">
+                        <h3>Risk Index</h3>
+                        <p class="summary-value" id="risk_index">--</p>
+                        <span class="trend stable"><i class="fas fa-minus"></i> <span id="risk_trend">--</span></span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Dashboard Grid -->
+            <section class="dashboard-grid">
+                <div class="dashboard-card wide" id="trend_analysis">
+                    <div class="card-header">
+                        <h3>Trend Analysis</h3>
+                        <div class="card-actions">
+                            <button class="btn-icon"><i class="fas fa-download"></i></button>
+                            <button class="btn-icon"><i class="fas fa-ellipsis-v"></i></button>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="trendChart"></canvas>
+                    </div>
+                </div>
+                <div class="dashboard-card" id="outbreaks">
+                    <div class="card-header">
+                        <h3>Outbreaks</h3>
+                        <div class="card-actions">
+                            <button class="btn-icon"><i class="fas fa-download"></i></button>
+                        </div>
+                    </div>
+                    <div class="card-body" id="outbreaks_content">
+                        <!-- Outbreaks data will be loaded here -->
+                    </div>
+                </div>
+                <div class="dashboard-card" id="map">
+                    <div class="card-header">
+                        <h3>Map View</h3>
+                    </div>
+                    <div class="card-body" id="map_content">
+                        <!-- Map or map image/iframe here -->
+                    </div>
+                </div>
+                <div class="dashboard-card" id="ai-predictions">
+                    <div class="card-header">
+                        <h3>AI Predictions</h3>
+                    </div>
+                    <div class="card-body" id="ai_predictions_content">
+                        <!-- AI predictions will be loaded here -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- Health Chatbot Component -->
+            <section id="chat">
+                <div class="chat-widget" id="chatWidget">
+                    <div class="chat-header">
+                        <h3><i class="fas fa-robot"></i> Health Assistant</h3>
+                        <button class="btn-icon" id="minimizeChat"><i class="fas fa-minus"></i></button>
+                    </div>
+                    <div class="chat-body">
+                        <div class="chat-messages" id="chatMessages">
+                            <!-- Chat messages will appear here -->
+                        </div>
+                        <div class="chat-input">
+                            <input type="text" id="userMessage" placeholder="Ask about health trends...">
+                            <button id="sendMessage"><i class="fas fa-paper-plane"></i></button>
+                        </div>
+                    </div>
+                </div>
+                <button class="chat-trigger" id="showChat">
+                    <i class="fas fa-comment-medical"></i>
+                </button>
+            </section>
         </main>
     </div>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.4/moment.min.js"></script>
     <script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/chat.js') }}"></script>
 </body>
 </html> 
