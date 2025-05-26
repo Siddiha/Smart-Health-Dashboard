@@ -4,6 +4,10 @@ from prophet import Prophet
 from sklearn.linear_model import LinearRegression
 from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import train_test_split
+import random
+from datetime import datetime, timedelta
+from app.models import HealthData
+from app import db
 
 def prepare_data_for_prophet(data, disease_filter=None, country_filter=None):
     """Prepare data for Prophet forecasting model."""
@@ -128,3 +132,56 @@ def simulate_outbreak(initial_cases, r0, days, immunity_rate=0.0):
         })
     
     return results
+
+def generate_sample_data(days=30):
+    """Generate sample health data for testing"""
+    # Clear existing data
+    HealthData.query.delete()
+    
+    base_date = datetime.utcnow() - timedelta(days=days)
+    
+    for i in range(days * 3):  # 3 records per day on average
+        timestamp = base_date + timedelta(
+            days=i // 3,
+            hours=random.randint(6, 22),
+            minutes=random.randint(0, 59)
+        )
+        
+        health_record = HealthData(
+            user_id='sample_user',
+            timestamp=timestamp,
+            heart_rate=random.randint(60, 100),
+            blood_pressure_systolic=random.randint(110, 140),
+            blood_pressure_diastolic=random.randint(70, 90),
+            temperature=round(random.uniform(97.0, 99.5), 1),
+            weight=round(random.uniform(150, 180), 1),
+            steps=random.randint(3000, 12000),
+            sleep_hours=round(random.uniform(6, 9), 1)
+        )
+        
+        db.session.add(health_record)
+    
+    db.session.commit()
+
+def get_health_stats():
+    """Calculate health statistics"""
+    recent_data = HealthData.query.filter(
+        HealthData.timestamp >= datetime.utcnow() - timedelta(days=7)
+    ).all()
+    
+    if not recent_data:
+        return {}
+    
+    heart_rates = [d.heart_rate for d in recent_data if d.heart_rate]
+    steps = [d.steps for d in recent_data if d.steps]
+    sleep_hours = [d.sleep_hours for d in recent_data if d.sleep_hours]
+    
+    stats = {
+        'total_records': len(recent_data),
+        'avg_heart_rate': round(sum(heart_rates) / len(heart_rates), 1) if heart_rates else 0,
+        'avg_steps': round(sum(steps) / len(steps)) if steps else 0,
+        'avg_sleep': round(sum(sleep_hours) / len(sleep_hours), 1) if sleep_hours else 0,
+        'last_updated': recent_data[0].timestamp.isoformat() if recent_data else None
+    }
+    
+    return stats

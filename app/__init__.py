@@ -1,16 +1,21 @@
 from flask import Flask
-import os
-from dotenv import load_dotenv
+from flask_sqlalchemy import SQLAlchemy
+from flask_migrate import Migrate
+from app.config import Config
 
-load_dotenv()  # Load environment variables from .env file
+db = SQLAlchemy()
+migrate = Migrate()
 
 def create_app():
     """Initialize the Flask application."""
     app = Flask(__name__)
-    app.secret_key = os.getenv('SECRET_KEY', 'default_secret_key')
+    app.config.from_object(Config)
+    
+    db.init_app(app)
+    migrate.init_app(app, db)
     
     # Import and register blueprints
-    from app.routes import main_bp
+    from app.routes import bp as main_bp
     app.register_blueprint(main_bp)
     
     return app

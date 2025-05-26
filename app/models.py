@@ -2,6 +2,8 @@ import os
 import pandas as pd
 from pymongo import MongoClient
 from dotenv import load_dotenv
+from datetime import datetime
+from app import db
 
 load_dotenv()  # Load environment variables from .env file
 
@@ -76,3 +78,29 @@ class Database:
             }
         ]
         return list(collection.aggregate(pipeline))
+
+class HealthData(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.String(64), nullable=False, default='default_user')
+    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
+    heart_rate = db.Column(db.Integer, nullable=True)
+    blood_pressure_systolic = db.Column(db.Integer, nullable=True)
+    blood_pressure_diastolic = db.Column(db.Integer, nullable=True)
+    temperature = db.Column(db.Float, nullable=True)
+    weight = db.Column(db.Float, nullable=True)
+    steps = db.Column(db.Integer, nullable=True)
+    sleep_hours = db.Column(db.Float, nullable=True)
+    
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'user_id': self.user_id,
+            'timestamp': self.timestamp.isoformat(),
+            'heart_rate': self.heart_rate,
+            'blood_pressure_systolic': self.blood_pressure_systolic,
+            'blood_pressure_diastolic': self.blood_pressure_diastolic,
+            'temperature': self.temperature,
+            'weight': self.weight,
+            'steps': self.steps,
+            'sleep_hours': self.sleep_hours
+        }

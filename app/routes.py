@@ -4,25 +4,29 @@ import plotly.express as px
 import plotly.graph_objects as go
 import json
 import os
+from datetime import datetime, timedelta
 
-from app.models import Database
+from app.models import Database, HealthData
+from app import db
 from app.utils import (
     prepare_data_for_prophet, 
     forecast_with_prophet, 
     calculate_risk_score, 
     get_time_series_analysis,
     get_correlation_analysis,
-    simulate_outbreak
+    simulate_outbreak,
+    generate_sample_data,
+    get_health_stats
 )
 
 # Create Blueprint
-main_bp = Blueprint('main', __name__)
+bp = Blueprint('main', __name__)
 
 # Initialize database
 db = Database()
 
 # Import sample data if it doesn't exist in MongoDB
-@main_bp.before_app_first_request
+@bp.before_app_first_request
 def initialize_database():
     """Initialize the database with sample data if it doesn't exist."""
     if len(db.get_unique_countries('outbreaks')) == 0:
@@ -32,7 +36,7 @@ def initialize_database():
             db.import_csv_to_mongodb(csv_path, 'outbreaks')
 
 # Routes
-@main_bp.route('/')
+@bp.route('/')
 def index():
     """Render the main dashboard page."""
     # Get all countries and diseases for filters
@@ -49,7 +53,7 @@ def index():
         summary_stats=summary_stats
     )
 
-@main_bp.route('/api/data')
+@bp.route('/api/data')
 def get_data():
     """API endpoint to get filtered data."""
     country = request.args.get('country')
@@ -68,7 +72,7 @@ def get_data():
     
     return jsonify(data)
 
-@main_bp.route('/api/forecast')
+@bp.route('/api/forecast')
 def get_forecast():
     """API endpoint to get disease forecast."""
     country = request.args.get('country')
@@ -89,7 +93,7 @@ def get_forecast():
     
     return jsonify(result)
 
-@main_bp.route('/api/risk-assessment')
+@bp.route('/api/risk-assessment')
 def get_risk_assessment():
     """API endpoint to get risk assessment."""
     country = request.args.get('country')
@@ -114,7 +118,7 @@ def get_risk_assessment():
     
     return jsonify(result)
 
-@main_bp.route('/api/time-series')
+@bp.route('/api/time-series')
 def get_time_series():
     """API endpoint to get time series analysis."""
     country = request.args.get('country')
@@ -131,7 +135,7 @@ def get_time_series():
     
     return jsonify(result)
 
-@main_bp.route('/api/correlations')
+@bp.route('/api/correlations')
 def get_correlations():
     """API endpoint to get correlation analysis."""
     country = request.args.get('country')
@@ -153,7 +157,7 @@ def get_correlations():
     
     return jsonify(corr_data)
 
-@main_bp.route('/api/simulate')
+@bp.route('/api/simulate')
 def get_simulation():
     """API endpoint to simulate a disease outbreak."""
     initial_cases = int(request.args.get('initial_cases', 100))
@@ -166,7 +170,7 @@ def get_simulation():
     
     return jsonify(sim_data)
 
-@main_bp.route('/api/chatbot', methods=['POST'])
+@bp.route('/api/chatbot', methods=['POST'])
 def chatbot():
     """API endpoint for the health chatbot."""
     data = request.json
@@ -186,3 +190,45 @@ def chatbot():
         response = "I don't have specific information about that. Please ask about COVID-19, influenza, dengue, or malaria."
     
     return jsonify({'response': response})
+
+@bp.route('/api/health-data', methods=['GET'])
+def get_health_data():
+    days = request.args.get('days', 30, type=int)
+    start_date = datetime.utcnow() - timedelta(days=days)
+    
+    data = HealthData.query.filter(
+        HealthData.timestamp >= start_date
+    ).order_by(HealthData.timestamp.desc()).all()
+    
+    return jsonify([item.to_dict() for item in data])
+
+@bp.route('/api/health-data', methods=['POST'])
+def add_health_data():
+    data = request.get_json()
+    
+    health_record = HealthData(
+        user_id=data.get('user_id', 'default_user'),
+        heart_rate=data.get('heart_rate'),
+        blood_pressure_systolic=data.get('blood_pressure_systolic'),
+        blood_pressure_diastolic=data.get('blood_pressure_diastolic'),
+        temperature=data.get('temperature'),
+        weight=data.get('weight'),
+        steps=data.get('steps'),
+        sleep_hours=data.get('sleep_hours')
+    )
+    
+    db.session.add(health_record)
+    db.session.commit()
+    
+    return jsonify(health_record.to_dict()), 201
+
+@bp.route('/api/stats')
+def get_stats():
+    stats = get_health_stats()
+    return jsonify(stats)
+
+@bp.route('/api/generate-sample-data', methods=['POST'])
+def generate_sample():
+    days = request.json.get('days', 30) if request.json else 30
+    generate_sample_data(days)
+    return jsonify({'message': f'Generated sample data for {days} days'})

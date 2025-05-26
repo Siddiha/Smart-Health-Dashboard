@@ -3,159 +3,277 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Smart Health Dashboard</title>
+    <title>HealthFlow - Smart Dashboard</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 </head>
 <body>
+    <div class="background-gradient"></div>
+    <div class="floating-shapes">
+        <div class="shape shape-1"></div>
+        <div class="shape shape-2"></div>
+        <div class="shape shape-3"></div>
+        <div class="shape shape-4"></div>
+    </div>
+    
     <div class="container">
-        <!-- Sidebar -->
-        <nav class="sidebar">
-            <div class="sidebar-header">
-                <h2><i class="fas fa-heartbeat"></i> HealthTrack</h2>
+        <nav class="navbar">
+            <div class="nav-brand">
+                <div class="brand-icon">
+                    <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <circle cx="16" cy="16" r="16" fill="url(#gradient)"/>
+                        <path d="M16 8L20 12H18V20H14V12H12L16 8Z" fill="white"/>
+                        <defs>
+                            <linearGradient id="gradient" x1="0" y1="0" x2="32" y2="32">
+                                <stop offset="0%" stop-color="#667eea"/>
+                                <stop offset="100%" stop-color="#764ba2"/>
+                            </linearGradient>
+                        </defs>
+                    </svg>
+                </div>
+                <span class="brand-text">HealthFlow</span>
             </div>
-            <ul class="sidebar-menu">
-                <li class="active"><a href="#dashboard"><i class="fas fa-chart-line"></i> <span>Dashboard</span></a></li>
-                <li><a href="#outbreaks"><i class="fas fa-virus"></i> <span>Outbreaks</span></a></li>
-                <li><a href="#map"><i class="fas fa-map-marked-alt"></i> <span>Map View</span></a></li>
-                <li><a href="#ai-predictions"><i class="fas fa-robot"></i> <span>AI Predictions</span></a></li>
-                <li><a href="#chat"><i class="fas fa-comment-medical"></i> <span>Health Chat</span></a></li>
-                <li><a href="#settings"><i class="fas fa-cog"></i> <span>Settings</span></a></li>
-            </ul>
-            <div class="sidebar-footer">
-                <span>Data last updated: <span id="last_update">--</span></span>
+            <div class="nav-controls">
+                <button id="refreshBtn" class="btn btn-glass">
+                    <span class="btn-icon">🔄</span>
+                    Refresh
+                </button>
+                <button id="generateSampleBtn" class="btn btn-primary">
+                    <span class="btn-icon">✨</span>
+                    Generate Data
+                </button>
             </div>
         </nav>
 
-        <!-- Main Content -->
-        <main class="main-content">
-            <header class="main-header">
-                <div class="search-container">
-                    <i class="fas fa-search"></i>
-                    <input type="text" placeholder="Search health data...">
-                </div>
-                <div class="user-menu">
-                    <button class="btn btn-refresh" id="refreshData"><i class="fas fa-sync-alt"></i> Refresh Data</button>
-                    <div class="user-profile">
-                        <img src="/static/img/user.png" alt="User Profile">
-                        <span>Admin User</span>
-                    </div>
-                </div>
-            </header>
+        <div class="hero-section">
+            <div class="hero-content">
+                <h1 class="hero-title">Your Health, <span class="gradient-text">Visualized</span></h1>
+                <p class="hero-subtitle">Track, analyze, and improve your wellness journey with real-time insights</p>
+            </div>
+        </div>
 
-            <!-- Dashboard Cards -->
-            <section id="dashboard" class="dashboard-summary">
-                <div class="summary-card">
-                    <div class="summary-icon bg-blue">
-                        <i class="fas fa-users"></i>
-                    </div>
-                    <div class="summary-info">
-                        <h3>Total Cases</h3>
-                        <p class="summary-value" id="total_cases">--</p>
-                        <span class="trend up"><i class="fas fa-arrow-up"></i> <span id="cases_trend">--</span></span>
+        <div class="stats-grid">
+            <div class="stat-card pulse-card">
+                <div class="stat-header">
+                    <div class="stat-icon heart-pulse">💓</div>
+                    <div class="stat-trend up">+2.3%</div>
+                </div>
+                <div class="stat-info">
+                    <div class="stat-value" id="avgHeartRate">--</div>
+                    <div class="stat-label">Avg Heart Rate</div>
+                    <div class="stat-unit">BPM</div>
+                </div>
+                <div class="stat-sparkline" id="heartSparkline"></div>
+            </div>
+            
+            <div class="stat-card steps-card">
+                <div class="stat-header">
+                    <div class="stat-icon steps-bounce">👟</div>
+                    <div class="stat-trend up">+15.7%</div>
+                </div>
+                <div class="stat-info">
+                    <div class="stat-value" id="avgSteps">--</div>
+                    <div class="stat-label">Daily Steps</div>
+                    <div class="stat-unit">STEPS</div>
+                </div>
+                <div class="stat-progress">
+                    <div class="progress-bar">
+                        <div class="progress-fill steps-progress"></div>
                     </div>
                 </div>
-                <div class="summary-card">
-                    <div class="summary-icon bg-green">
-                        <i class="fas fa-medkit"></i>
-                    </div>
-                    <div class="summary-info">
-                        <h3>Recoveries</h3>
-                        <p class="summary-value" id="total_recoveries">--</p>
-                        <span class="trend up"><i class="fas fa-arrow-up"></i> <span id="recoveries_trend">--</span></span>
-                    </div>
+            </div>
+            
+            <div class="stat-card sleep-card">
+                <div class="stat-header">
+                    <div class="stat-icon sleep-float">🌙</div>
+                    <div class="stat-trend down">-0.5h</div>
                 </div>
-                <div class="summary-card">
-                    <div class="summary-icon bg-red">
-                        <i class="fas fa-procedures"></i>
-                    </div>
-                    <div class="summary-info">
-                        <h3>Active Cases</h3>
-                        <p class="summary-value" id="active_cases">--</p>
-                        <span class="trend down"><i class="fas fa-arrow-down"></i> <span id="active_trend">--</span></span>
-                    </div>
+                <div class="stat-info">
+                    <div class="stat-value" id="avgSleep">--</div>
+                    <div class="stat-label">Sleep Quality</div>
+                    <div class="stat-unit">HOURS</div>
                 </div>
-                <div class="summary-card">
-                    <div class="summary-icon bg-purple">
-                        <i class="fas fa-chart-pie"></i>
-                    </div>
-                    <div class="summary-info">
-                        <h3>Risk Index</h3>
-                        <p class="summary-value" id="risk_index">--</p>
-                        <span class="trend stable"><i class="fas fa-minus"></i> <span id="risk_trend">--</span></span>
-                    </div>
+                <div class="sleep-quality">
+                    <div class="quality-indicator excellent"></div>
+                    <div class="quality-indicator good"></div>
+                    <div class="quality-indicator fair"></div>
+                    <div class="quality-indicator poor"></div>
                 </div>
-            </section>
+            </div>
+            
+            <div class="stat-card records-card">
+                <div class="stat-header">
+                    <div class="stat-icon data-pulse">📊</div>
+                    <div class="stat-trend neutral">Today</div>
+                </div>
+                <div class="stat-info">
+                    <div class="stat-value" id="totalRecords">--</div>
+                    <div class="stat-label">Health Records</div>
+                    <div class="stat-unit">ENTRIES</div>
+                </div>
+                <div class="record-timeline">
+                    <div class="timeline-dot active"></div>
+                    <div class="timeline-dot active"></div>
+                    <div class="timeline-dot active"></div>
+                    <div class="timeline-dot"></div>
+                </div>
+            </div>
+        </div>
 
-            <!-- Dashboard Grid -->
-            <section class="dashboard-grid">
-                <div class="dashboard-card wide" id="trend_analysis">
-                    <div class="card-header">
-                        <h3>Trend Analysis</h3>
-                        <div class="card-actions">
-                            <button class="btn-icon"><i class="fas fa-download"></i></button>
-                            <button class="btn-icon"><i class="fas fa-ellipsis-v"></i></button>
+        <div class="charts-section">
+            <div class="section-header">
+                <h2 class="section-title">Health Analytics</h2>
+                <div class="time-selector">
+                    <button class="time-btn active">7D</button>
+                    <button class="time-btn">30D</button>
+                    <button class="time-btn">90D</button>
+                </div>
+            </div>
+            
+            <div class="charts-grid">
+                <div class="chart-card primary-chart">
+                    <div class="chart-header">
+                        <div class="chart-title">
+                            <span class="chart-icon">💓</span>
+                            Heart Rate Trend
+                        </div>
+                        <div class="chart-actions">
+                            <button class="chart-btn">⚙️</button>
+                            <button class="chart-btn">📊</button>
                         </div>
                     </div>
-                    <div class="card-body">
-                        <canvas id="trendChart"></canvas>
+                    <div class="chart-container">
+                        <canvas id="heartRateChart"></canvas>
                     </div>
                 </div>
-                <div class="dashboard-card" id="outbreaks">
-                    <div class="card-header">
-                        <h3>Outbreaks</h3>
-                        <div class="card-actions">
-                            <button class="btn-icon"><i class="fas fa-download"></i></button>
+                
+                <div class="chart-card secondary-chart">
+                    <div class="chart-header">
+                        <div class="chart-title">
+                            <span class="chart-icon">🩺</span>
+                            Blood Pressure
+                        </div>
+                        <div class="chart-status">
+                            <span class="status-dot normal"></span>
+                            Normal Range
                         </div>
                     </div>
-                    <div class="card-body" id="outbreaks_content">
-                        <!-- Outbreaks data will be loaded here -->
+                    <div class="chart-container">
+                        <canvas id="bloodPressureChart"></canvas>
                     </div>
                 </div>
-                <div class="dashboard-card" id="map">
-                    <div class="card-header">
-                        <h3>Map View</h3>
+                
+                <div class="chart-card tertiary-chart">
+                    <div class="chart-header">
+                        <div class="chart-title">
+                            <span class="chart-icon">🚶‍♂️</span>
+                            Activity Level
+                        </div>
+                        <div class="chart-metric">
+                            <span class="metric-value">85%</span>
+                            <span class="metric-label">Goal</span>
+                        </div>
                     </div>
-                    <div class="card-body" id="map_content">
-                        <!-- Map or map image/iframe here -->
+                    <div class="chart-container">
+                        <canvas id="stepsChart"></canvas>
                     </div>
                 </div>
-                <div class="dashboard-card" id="ai-predictions">
-                    <div class="card-header">
-                        <h3>AI Predictions</h3>
+                
+                <div class="chart-card quaternary-chart">
+                    <div class="chart-header">
+                        <div class="chart-title">
+                            <span class="chart-icon">🌙</span>
+                            Sleep Pattern
+                        </div>
+                        <div class="sleep-score">
+                            <div class="score-circle">
+                                <span class="score-value">92</span>
+                            </div>
+                        </div>
                     </div>
-                    <div class="card-body" id="ai_predictions_content">
-                        <!-- AI predictions will be loaded here -->
+                    <div class="chart-container">
+                        <canvas id="sleepChart"></canvas>
                     </div>
                 </div>
-            </section>
+            </div>
+        </div>
 
-            <!-- Health Chatbot Component -->
-            <section id="chat">
-                <div class="chat-widget" id="chatWidget">
-                    <div class="chat-header">
-                        <h3><i class="fas fa-robot"></i> Health Assistant</h3>
-                        <button class="btn-icon" id="minimizeChat"><i class="fas fa-minus"></i></button>
-                    </div>
-                    <div class="chat-body">
-                        <div class="chat-messages" id="chatMessages">
-                            <!-- Chat messages will appear here -->
-                        </div>
-                        <div class="chat-input">
-                            <input type="text" id="userMessage" placeholder="Ask about health trends...">
-                            <button id="sendMessage"><i class="fas fa-paper-plane"></i></button>
-                        </div>
-                    </div>
+        <div class="data-entry-section">
+            <div class="entry-card">
+                <div class="entry-header">
+                    <h3 class="entry-title">Add Health Data</h3>
+                    <div class="entry-subtitle">Record your latest measurements</div>
                 </div>
-                <button class="chat-trigger" id="showChat">
-                    <i class="fas fa-comment-medical"></i>
-                </button>
-            </section>
-        </main>
+                
+                <form id="healthForm" class="health-form">
+                    <div class="form-grid">
+                        <div class="input-group">
+                            <label class="input-label">Heart Rate</label>
+                            <div class="input-wrapper">
+                                <input type="number" id="heartRate" name="heart_rate" min="40" max="200" placeholder="72">
+                                <span class="input-unit">BPM</span>
+                            </div>
+                        </div>
+                        
+                        <div class="input-group">
+                            <label class="input-label">Blood Pressure</label>
+                            <div class="bp-inputs">
+                                <div class="input-wrapper half">
+                                    <input type="number" id="systolic" name="blood_pressure_systolic" min="80" max="200" placeholder="120">
+                                    <span class="input-unit">SYS</span>
+                                </div>
+                                <span class="bp-separator">/</span>
+                                <div class="input-wrapper half">
+                                    <input type="number" id="diastolic" name="blood_pressure_diastolic" min="40" max="120" placeholder="80">
+                                    <span class="input-unit">DIA</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="input-group">
+                            <label class="input-label">Temperature</label>
+                            <div class="input-wrapper">
+                                <input type="number" id="temperature" name="temperature" step="0.1" min="95" max="105" placeholder="98.6">
+                                <span class="input-unit">°F</span>
+                            </div>
+                        </div>
+                        
+                        <div class="input-group">
+                            <label class="input-label">Weight</label>
+                            <div class="input-wrapper">
+                                <input type="number" id="weight" name="weight" step="0.1" min="50" max="500" placeholder="165.0">
+                                <span class="input-unit">LBS</span>
+                            </div>
+                        </div>
+                        
+                        <div class="input-group">
+                            <label class="input-label">Daily Steps</label>
+                            <div class="input-wrapper">
+                                <input type="number" id="steps" name="steps" min="0" max="50000" placeholder="8500">
+                                <span class="input-unit">STEPS</span>
+                            </div>
+                        </div>
+                        
+                        <div class="input-group">
+                            <label class="input-label">Sleep Hours</label>
+                            <div class="input-wrapper">
+                                <input type="number" id="sleep" name="sleep_hours" step="0.5" min="0" max="24" placeholder="7.5">
+                                <span class="input-unit">HRS</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <button type="submit" class="submit-btn">
+                        <span class="btn-icon">✨</span>
+                        <span class="btn-text">Record Health Data</span>
+                        <div class="btn-ripple"></div>
+                    </button>
+                </form>
+            </div>
+        </div>
     </div>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.4/moment.min.js"></script>
+
     <script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/chat.js') }}"></script>
 </body>
 </html> 
